@@ -1,5 +1,7 @@
 package com.dusz7;
 
+import com.dusz7.connection.HttpAgentThread;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;

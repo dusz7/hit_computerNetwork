@@ -1,4 +1,4 @@
-package com.dusz7;
+package com.dusz7.url;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -6,19 +6,8 @@ import java.net.UnknownHostException;
 /**
  * Created by dusz2 on 2016/10/16 0016.
  */
-public class MyURLUtil {
+public class URLUtil {
 
-//    public static String getRequestURL(String firstLine){
-//        String[] tokens = firstLine.split(" ");
-//        String URL = "";
-//        for (int index = 0; index < tokens.length; index++) {
-//            if (tokens[index].startsWith("http://")) {
-//                URL = tokens[index];
-//                break;
-//            }
-//        }
-//        return URL;
-//    }
 
     private String scheme;
     private String host;
@@ -26,7 +15,7 @@ public class MyURLUtil {
     private String resource;
     private String IP;
 
-    public MyURLUtil(String requestUrl){
+    public URLUtil(String requestUrl){
         String scheme = "http";
         String host = "";
         String port = "80"; // http应用的默认端口为80
