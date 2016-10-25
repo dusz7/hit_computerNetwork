@@ -9,12 +9,14 @@ public class URLFish {
 
     private static String toUrl = "http://jwc.hit.edu.cn/";
 
-    public static String getHead(){
-        String head = "";
-        head = "HTTP/1.1 302 Moved Temporarily\r\n";
-        return head;
+    //重定向响应报文头
+    public static String getRequest(){
+        String request = "";
+        request = "HTTP/1.1 302 Moved Temporarily\r\n";
+        return request;
     }
 
+    //重定向响应报文首部
     public static String getFirst(){
         String first = "";
         first = "Location: "+toUrl+"\r\n\r\n";

@@ -104,7 +104,7 @@ public class HttpAgentThread extends Thread {
                         }
                         else {
                             System.out.println("-------  此URL被重定向：  " + urlStr + "  -------");
-                            clientOS.write(URLFish.getHead().getBytes());
+                            clientOS.write(URLFish.getRequest().getBytes());
                             clientOS.write(URLFish.getFirst().getBytes());
                             clientOS.flush();
                         }

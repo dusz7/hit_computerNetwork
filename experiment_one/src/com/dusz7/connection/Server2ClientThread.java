@@ -20,15 +20,10 @@ public class Server2ClientThread extends Thread {
         byte bytes[] = new byte[1024];
         while(true){
             try {
-                String test = "";
                 if ((length = serverIS.read(bytes)) > 0) {
-
-//                    test+=serverIS.read(bytes);
-
                     clientOS.write(bytes, 0, length);
                     clientOS.flush();
                 } else if (length < 0)
-//                    System.out.print(test);
                     break;
             } catch (Exception e) {
 
