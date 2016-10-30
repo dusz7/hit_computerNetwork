@@ -7,4 +7,6 @@ public class Easy {
     public static final int GBNSP = 7777;
 
     public static final int DATA_NUM = 25;
+
+    public static final int WIN_SIZE = 10;
 }

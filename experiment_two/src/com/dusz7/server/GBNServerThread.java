@@ -45,7 +45,6 @@ public class GBNServerThread extends Thread {
     public void run(){
         while (true){
             receivePacket = new DatagramPacket(receive,receive.length);
-
             try{
                 serverSocket.receive(receivePacket);
 

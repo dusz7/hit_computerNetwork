@@ -1,5 +1,6 @@
 package com.dusz7.connection;
 
+import com.dusz7.cache.CacheUtil;
 import com.dusz7.url.URLFish;
 import com.dusz7.url.URLShield;
 import com.dusz7.url.URLUtil;
@@ -73,33 +74,45 @@ public class HttpAgentThread extends Thread {
                         //判断是否重定向
                         if(!URLFish.isFished(urlStr)){
 
-                            System.out.println("-------  此次客户端访问URL为：   " + urlStr + "  -------");
-                            //尝试建立与目的服务器的连接
-                            int retry = CONNECT_RETRIES;
-                            while (retry-- != 0) {
-                                try {
-                                    //建立与目的服务器连接的socket
-                                    //如果采用有这两个参数的socket构造器，则不用再调用connect()方法
-                                    socket2Server = new Socket(myURL.getIP(),myURL.getPort());
-                                    break;
+                            String modifyTime = CacheUtil.findCache(urlStr);
+                            if(modifyTime == null){
+                                System.out.println("-------  此次客户端访问URL为：   " + urlStr + "  -------");
+                                //尝试建立与目的服务器的连接
+                                int retry = CONNECT_RETRIES;
+                                while (retry-- != 0) {
+                                    try {
+                                        //建立与目的服务器连接的socket
+                                        //如果采用有这两个参数的socket构造器，则不用再调用connect()方法
+                                        socket2Server = new Socket(myURL.getIP(),myURL.getPort());
+                                        break;
 
-                                } catch (Exception e) {
+                                    } catch (Exception e) {
 
+                                    }
+                                    // 每次尝试间隔
+                                    Thread.sleep(CONNECT_PAUSE);
                                 }
-                                // 每次尝试间隔
-                                Thread.sleep(CONNECT_PAUSE);
+
+                                //如果建立连接成功
+                                if (socket2Server != null) {
+                                    socket2Server.setSoTimeout(TIMEOUT);
+                                    serverIS = socket2Server.getInputStream();
+                                    serverOS = socket2Server.getOutputStream();
+
+                                    serverOS.write(firstLine.getBytes());  // 转发请求头
+
+                                    createTube(clientIS , clientOS , serverIS , serverOS);  // 建立源客户端与目的服务器的通信管道
+                                }
+                            }
+                            //cache
+                            else {
+                                //验证
+                                boolean isNew = CacheUtil.isNew(socket2Server,socket2Client,modifyTime);
+                                if(!isNew){
+                                    CacheUtil.getNew(socket2Server,socket2Client);
+                                }
                             }
 
-                            //如果建立连接成功
-                            if (socket2Server != null) {
-                                socket2Server.setSoTimeout(TIMEOUT);
-                                serverIS = socket2Server.getInputStream();
-                                serverOS = socket2Server.getOutputStream();
-
-                                serverOS.write(firstLine.getBytes());  // 转发请求头
-
-                                createTube(clientIS , clientOS , serverIS , serverOS);  // 建立源客户端与目的服务器的通信管道
-                            }
 
                         }
                         else {

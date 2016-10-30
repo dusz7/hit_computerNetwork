@@ -19,7 +19,8 @@ public class GBNClientThread extends Thread {
     private static int begin = 0, end;
     private static int dataNum;
     private static int toSendNum;
-    private static Timer[] timers;
+//    private static Timer[] timers;
+    static Timer timer;
 
     private static InetAddress inetAddress;
 
@@ -36,12 +37,13 @@ public class GBNClientThread extends Thread {
 
         }
 
-        winSize = 10;
+        winSize = Easy.WIN_SIZE;
         end = begin + winSize -1;
         dataNum = Easy.DATA_NUM;
         toSendNum = dataNum;
         seqNum = 50;
-        timers = new Timer[50];
+//        timers = new Timer[50];
+
         try {
             clientSocket = new DatagramSocket();
         }catch (SocketException e){
@@ -53,6 +55,8 @@ public class GBNClientThread extends Thread {
         System.out.println("滑动窗大小为" + winSize);
         System.out.println("客户端即将发送" + dataNum +"个数据包");
 
+        timer = new Timer(3000,new DelayActionListener(clientSocket,begin));
+        timer.start();
         //首先发送窗格大小个数的数据包
         for (int i = begin; i <= end; i++){
             if(i <10 ){
@@ -66,8 +70,8 @@ public class GBNClientThread extends Thread {
                 clientSocket.send(sendPacket);
                 toSendNum--;
                 //设置定时器，设置时间为3秒
-                timers[i] = new Timer(3000, new DelayActionListener(clientSocket,i,timers));
-                timers[i].start();
+//                timers[i] = new Timer(3000, new DelayActionListener(clientSocket,i,timers));
+//                timers[i].start();
                 System.out.println("-------  Client发送数据包："+i+"  -------");
             }catch (IOException e){
 
@@ -91,13 +95,16 @@ public class GBNClientThread extends Thread {
                 System.out.println("-------  Client接收到ACK序号："+ackNum+"  -------");
 
                 //关闭定时器
-                timers[ackNum].stop();
+//                timers[ackNum].stop();
+
 
                 if(ackNum == dataNum -1){
-                    System.out.println("-------  Client数据全部发送完毕!"  +"  -------");
+                    System.out.println("-------  Client数据全部发送完毕!" +"  -------");
                     return;
                 }
                 else if(ackNum == begin && toSendNum > 0){
+
+                    timer.stop();
                     begin++;
                     end++;
                     //巡回
@@ -121,8 +128,11 @@ public class GBNClientThread extends Thread {
                         toSendNum--;
 
                         //设置定时器
-                        timers[end] = new Timer(3000, new DelayActionListener(clientSocket,end,timers));
-                        timers[end].start();
+//                        timers[end] = new Timer(3000, new DelayActionListener(clientSocket,end,timers));
+//                        timers[end].start();
+                        timer = new Timer(3000,new DelayActionListener(clientSocket,begin));
+                        timer.start();
+
                         System.out.println("-------  Client发送数据包："+end+"  -------");
                     }catch (IOException e){
 
@@ -147,25 +157,31 @@ class DelayActionListener implements ActionListener{
 
     private DatagramSocket socket;
     private int seqNo;
-    private Timer[] timers;
+//    private Timer[] timers;
 
 
     public DelayActionListener(DatagramSocket clientSocket, int seqNum, Timer[] timers){
         this.socket = clientSocket;
         this.seqNo = seqNum;
-        this.timers = timers;
+//        this.timers = timers;
+    }
+
+    public DelayActionListener(DatagramSocket clientSocket, int seqNo){
+        this.socket = clientSocket;
+        this.seqNo = seqNo;
     }
 
     @Override
     public void actionPerformed(ActionEvent e){
-        int end = GBNClientThread.getEnd();
-        System.out.println("-------  客户端准备重传数据 " + seqNo +"--" + end+"  -------");
-        //强行来
-        for (int i = seqNo; i <= end; i++){
-            timers[i].stop();
-            timers[i].start();
-        }
-        for (int i = seqNo; i <= end; i++){
+
+        GBNClientThread.timer.stop();
+        GBNClientThread.timer = new Timer(3000,new DelayActionListener(socket,seqNo));
+        GBNClientThread.timer.start();
+
+        int end = seqNo+Easy.WIN_SIZE-1;
+        System.out.println("-------  Client准备重传数据 " + seqNo +"--" + end +"  -------");
+
+        for(int i = seqNo; i <= end; i++){
             byte[] sendData = null;
             InetAddress serverAddress = null;
             try {
@@ -178,12 +194,38 @@ class DelayActionListener implements ActionListener{
                 }
                 DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, serverAddress, Easy.GBNSP);
                 socket.send(sendPacket);
-                System.out.println("-------  客户端发送数据包 " + i+"  -------");
+                System.out.println("-------  Client发送数据包 " + i +"  -------");
             } catch (Exception e1) {
                 e1.printStackTrace();
             }
+        }
+
+//        int end = GBNClientThread.getEnd();
+//        System.out.println("-------  客户端准备重传数据 " + seqNo +"--" + end+"  -------");
+//        //强行来
+//        for (int i = seqNo; i <= end; i++){
 //            timers[i].stop();
 //            timers[i].start();
-        }
+//        }
+//        for (int i = seqNo; i <= end; i++){
+//            byte[] sendData = null;
+//            InetAddress serverAddress = null;
+//            try {
+//                serverAddress = InetAddress.getByName("localhost");
+//                if(i <10 ){
+//                    sendData = (new String(i+"x "+"seq")).getBytes();
+//                }
+//                else if(i < 100){
+//                    sendData = (new String(i+" "+"seq")).getBytes();
+//                }
+//                DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, serverAddress, Easy.GBNSP);
+//                socket.send(sendPacket);
+//                System.out.println("-------  客户端发送数据包 " + i+"  -------");
+//            } catch (Exception e1) {
+//                e1.printStackTrace();
+//            }
+////            timers[i].stop();
+////            timers[i].start();
+//        }
     }
 }
