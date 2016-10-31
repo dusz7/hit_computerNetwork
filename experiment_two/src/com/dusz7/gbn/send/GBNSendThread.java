@@ -41,9 +41,9 @@ public class GBNSendThread extends Thread {
         serverPort = port;
         winSize = Easy.GBN_WIN_SIZE;
         end = begin + winSize -1;
-        dataNum = Easy.DATA_NUM;
+        dataNum = Easy.GBN_DATA_NUM;
         toSendNum = dataNum;
-        seqNum = Easy.GBN_SEQ_NUM;
+        seqNum = Easy.SEQ_NUM;
 
         try {
             clientSocket = new DatagramSocket();
@@ -95,6 +95,7 @@ public class GBNSendThread extends Thread {
 
                 if(ackNum == dataNum -1){
                     System.out.println("-------  Client数据全部发送完毕!" +"  -------");
+                    timer.stop();
                     return;
                 }
                 else if(ackNum == begin && toSendNum > 0){
