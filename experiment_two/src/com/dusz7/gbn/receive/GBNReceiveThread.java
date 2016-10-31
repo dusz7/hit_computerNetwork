@@ -1,4 +1,4 @@
-package com.dusz7.server;
+package com.dusz7.gbn.receive;
 
 import com.dusz7.just4easy.Easy;
 
@@ -11,7 +11,7 @@ import java.net.SocketException;
 /**
  * Created by dusz2 on 2016/10/25 0025.
  */
-public class GBNServerThread extends Thread {
+public class GBNReceiveThread extends Thread {
     private static int serverPort;
 
     private static DatagramPacket receivePacket;
@@ -27,9 +27,9 @@ public class GBNServerThread extends Thread {
     private static int toReceiveNum;
 
 
-    public GBNServerThread(){
+    public GBNReceiveThread(int port){
         last = -1;
-        serverPort = Easy.GBNSP;
+        serverPort = port;
 
         dataNum = Easy.DATA_NUM;
         toReceiveNum = dataNum;
@@ -44,6 +44,7 @@ public class GBNServerThread extends Thread {
     @Override
     public void run(){
         while (true){
+
             receivePacket = new DatagramPacket(receive,receive.length);
             try{
                 serverSocket.receive(receivePacket);
